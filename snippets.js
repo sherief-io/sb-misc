@@ -56,3 +56,14 @@ function calculateRepeatCount(tableName, encodedQuery, limit) {
 // gs.print(calculateRepeatCount(tableName, encodedQuery, limit));
 
 runScript(tableName, encodedQuery, limit, dryRun);
+
+
+var testclass = Class.create();
+testclass.prototype = {
+initialize: function() {
+},
+
+
+
+type: testclass
+};
