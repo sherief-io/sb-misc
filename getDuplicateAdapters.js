@@ -7,21 +7,27 @@ var getMainCI = new GlideRecord(mainClass);
 getMainCI.addEncodedQuery(mainClassQuery);
 getMainCI.query();
 while (getMainCI.next()) {
-  swSysID = getMainCI.getValue("sys_id");
+  mainCISysID = getMainCI.getValue("sys_id");
 }
 
-// get unique list of adapter names for a switch
-function getSwitchAdapters(swSysID) {
-  var getSwAdpts = new GlideRecord(subClass);
-  getSwAdpts; // Query
-  getSwAdpts.query();
-  while (getSwAdpts.next()) {
-    getSwAdpts; // Do What
+// get unique list of duplicate Sub-CIs for the Main CI based on criteria
+function getSubCIs(mainCISysID) {
+  var subCIList = [];
+  var getSubCIs = new GlideRecord(subClass);
+  getSubCIs.addQuery("cmdb_ci", ciSysID); // Query
+  getSubCIs.query();
+  while (getSubCIs.next()) {
+    if (!subCIList) {
+      subCIList += getSubCIs.getValue("sys_id");
+    } else {
+      subCIList += "," + getSubCIs.getValue("sys_id");
+    }
   }
+  return subCIList;
 }
 
-// For each name, check if there are other adapters that share the name
-
+// For each sub-CI name, check if there are other sub-CIs that share the name
+function getSubCICount(subClass, subCIIdentifier, mainCISysID) {}
 //
 
 function getSwitch(switchSysID) {}
