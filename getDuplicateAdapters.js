@@ -1,33 +1,58 @@
+gs.log("Start Script Execution", "SF_SCRIPT");
+
 var mainClass = "cmdb_ci_ip_switch";
-var mainClassQuery =
-  "manufacturer=c6592abadb47138071957608f49619ce^discovery_source=ServiceNow";
+var mainClassQuery = "discovery_source=ServiceNow";
 var subClass = "cmdb_ci_network_adapter";
 
 var getMainCI = new GlideRecord(mainClass);
 getMainCI.addEncodedQuery(mainClassQuery);
 getMainCI.query();
 while (getMainCI.next()) {
-  mainCISysID = getMainCI.getValue("sys_id");
+  var logMessageCI = "";
+  var mainCISysID = getMainCI.getValue("sys_id");
+  logMessageCI =
+    "Main CI: " +
+    getMainCI.getDisplayValue() +
+    "|" +
+    getMainCI.getValue("sys_id");
+  var subList = getSubCIUniqueList(mainCISysID);
+  getSubCICount(subClass, subList, mainCISysID);
+  gs.log(logMessageCI, "SF-Script");
 }
 
 // get unique list of duplicate Sub-CIs for the Main CI based on criteria
-function getSubCIs(mainCISysID) {
-  var subCIList = [];
-  var getSubCIs = new GlideRecord(subClass);
-  getSubCIs.addQuery("cmdb_ci", ciSysID); // Query
-  getSubCIs.query();
-  while (getSubCIs.next()) {
-    if (!subCIList) {
-      subCIList += getSubCIs.getValue("sys_id");
-    } else {
-      subCIList += "," + getSubCIs.getValue("sys_id");
+function getSubCIUniqueList(mainCISysID) {
+  var subCIUniqueList = [];
+  var subCIGRs = new GlideRecord(subClass);
+  subCIGRs.addQuery("cmdb_ci", mainCISysID); // Query
+  subCIGRs.query();
+  while (subCIGRs.next()) {
+    var subCIName = subCIGRs.getValue("name");
+    var arrayUtil = new ArrayUtil();
+    if (!arrayUtil.contains(subCIUniqueList, subCIName)) {
+      subCIUniqueList.push(subCIName);
     }
   }
-  return subCIList;
+  return subCIUniqueList;
 }
 
 // For each sub-CI name, check if there are other sub-CIs that share the name
-function getSubCICount(subClass, subCIIdentifier, mainCISysID) {}
-//
-
-function getSwitch(switchSysID) {}
+function getSubCICount(subClass, subCIList, mainCISysID) {
+  for (var i = 0; i < subCIList.length; i++) {
+    var subCI = subCIList[i];
+    var queryString = "name=" + subCI + "^cmdb_ci=" + mainCISysID;
+    var getsubCIs = new GlideRecord(subClass);
+    var subCIs = [];
+    getsubCIs.addEncodedQuery(queryString); // Query
+    getsubCIs.query();
+    while (getsubCIs.next()) {
+      subCIs.push(getsubCIs.getValue("sys_id"));
+    }
+    logMessageCI +=
+      "\n Sub CI: " +
+      getsubCIs.getValue("name") +
+      " has " +
+      subCIs.length +
+      " records";
+  }
+}
