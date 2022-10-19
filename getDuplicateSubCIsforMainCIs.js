@@ -1,9 +1,11 @@
+// getDuplicateSubCIsforMainCIs.js
+
 gs.log("Start Script Execution", "SF_SCRIPT");
 
 var mainClass = "cmdb_ci_ip_switch";
 var mainClassQuery = "discovery_source=ServiceNow";
 var subClass = "cmdb_ci_network_adapter";
-
+// Main Script - Get list of Main CIs
 var getMainCI = new GlideRecord(mainClass);
 getMainCI.addEncodedQuery(mainClassQuery);
 getMainCI.query();
